@@ -174,3 +174,19 @@ var sendAjax = function sendAjax(type, action, data, success) {
     }
   });
 };
+
+// kitsuSearch()
+var kitsuSearch = function kitsuSearch(name, callback) {
+  if (name.length > 2) {
+    $.ajax({
+      type: 'GET',
+      url: 'https://kitsu.io/api/edge/anime?filter[text]=' + name,
+      dataType: 'json',
+      success: callback,
+      error: function error(xhr, status, _error2) {
+        var msgObj = JSON.parse(xhr.responseText);
+        handleError(msgObj.errorMessage);
+      }
+    });
+  }
+};

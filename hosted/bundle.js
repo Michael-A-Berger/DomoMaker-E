@@ -13,8 +13,11 @@ var handleDomo = function handleDomo(e) {
   e.preventDefault();
   $('#domoMessage').animate({ width: 'hide' }, 350);
 
+  // Hiding the Kitsu search results
+  $('#weebSearch').hide();
+
   // Error checking
-  if ($('#domoName').val() == '' || $('#domoAge').val() == '') {
+  if ($('#domoName').val() == '' || $('#domoAge').val() == '' || $('#domoWeeb').val() == '') {
     handleError('RAWR! All fields are required');
     return false;
   }
@@ -25,6 +28,77 @@ var handleDomo = function handleDomo(e) {
   });
 
   return false;
+};
+
+// selectWeebEntry()
+var selectWeebEntry = function selectWeebEntry(e) {
+  // Setting the anime entry form to the clicked example
+  console.dir(e.target);
+  $('#domoWeeb').val(e.target.innerText);
+
+  // Hiding the weeb searches
+  $('#weebSearch').hide();
+};
+
+// handleWeebEntries()
+var handleWeebEntries = function handleWeebEntries(entries) {
+  // Defining the HTML to render
+  var toRender = entries.map(function (entry) {
+    return React.createElement(
+      'div',
+      { className: 'weebEntry', onClick: selectWeebEntry },
+      React.createElement(
+        'span',
+        null,
+        entry
+      )
+    );
+  });
+  toRender = React.createElement(
+    'div',
+    null,
+    toRender
+  );
+
+  // Rendering the search entries to the page
+  ReactDOM.render(toRender, document.querySelector('#weebSearch'));
+};
+
+// kitsuResponse()
+var kitsuResponse = function kitsuResponse(data) {
+  var results = data.data;
+  var titles = {};
+  var titleKeys = [];
+  var entries = [];
+  for (var num = 0; num < results.length; num++) {
+    titles = results[num].attributes.titles;
+    titleKeys = Object.keys(titles);
+    for (var i = 0; i < titleKeys.length; i++) {
+      var entryYear = 'TBD';
+      if (results[num].attributes.startDate) {
+        entryYear = results[num].attributes.startDate;
+        entryYear = entryYear.substr(0, entryYear.indexOf('-'));
+      }
+      if (titles[titleKeys[i]] !== undefined) {
+        entries.push(titles[titleKeys[i]] + ' (' + entryYear + ')');
+        i = titleKeys.length;
+      }
+    }
+  }
+
+  // Rendering the search results
+  handleWeebEntries(entries);
+
+  // Showing the search results to the user
+  $('#weebSearch').show();
+};
+
+// searchKitsu()
+var searchKitsu = function searchKitsu(e) {
+  if (e.target.value !== '' && e.target.value.length > 2) {
+    console.log('==========\nSearching for "' + e.target.value + '" on Kitsu... ');
+    sendAjax('GET', 'https://kitsu.io/api/edge/anime?filter[text]=' + e.target.value, null, kitsuResponse);
+  }
 };
 
 // DomoForm()
@@ -49,6 +123,13 @@ var DomoForm = function DomoForm(props) {
       'Age: '
     ),
     React.createElement('input', { id: 'domoAge', type: 'text', name: 'age', placeholder: 'Domo Age' }),
+    React.createElement(
+      'label',
+      { id: 'domoWeebLabel', htmlFor: 'weeb' },
+      'Anime: '
+    ),
+    React.createElement('input', { id: 'domoWeeb', type: 'text', name: 'weeb', placeholder: 'Favorite Anime', onChange: searchKitsu }),
+    React.createElement('div', { id: 'weebSearch' }),
     React.createElement('input', { type: 'hidden', name: '_csrf', value: props.csrf }),
     React.createElement('input', { className: 'makeDomoSubmit', type: 'submit', value: 'Make Domo' })
   );
@@ -86,13 +167,20 @@ var DomoList = function DomoList(props) {
         ' Age: ',
         domo.age,
         ' '
+      ),
+      React.createElement(
+        'h3',
+        { className: 'domoWeeb' },
+        ' Fav. Weeb Trash: ',
+        domo.weebTrash,
+        ' '
       )
     );
   });
 
   return React.createElement(
     'div',
-    { className: 'domoLust' },
+    { className: 'domoList' },
     domoNodes
   );
 };
@@ -145,4 +233,20 @@ var sendAjax = function sendAjax(type, action, data, success) {
       handleError(msgObj.error);
     }
   });
+};
+
+// kitsuSearch()
+var kitsuSearch = function kitsuSearch(name, callback) {
+  if (name.length > 2) {
+    $.ajax({
+      type: 'GET',
+      url: 'https://kitsu.io/api/edge/anime?filter[text]=' + name,
+      dataType: 'json',
+      success: callback,
+      error: function error(xhr, status, _error2) {
+        var msgObj = JSON.parse(xhr.responseText);
+        handleError(msgObj.errorMessage);
+      }
+    });
+  }
 };

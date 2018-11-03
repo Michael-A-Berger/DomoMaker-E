@@ -4,13 +4,14 @@ const Domo = models.Domo;
 
 // makeDomo()
 const makeDomo = (rq, rp) => {
-  if (!rq.body.name || !rq.body.age) {
-    return rp.status(400).json({ error: 'RAWR! Both name and age are required!' });
+  if (!rq.body.name || !rq.body.age || !rq.body.weeb) {
+    return rp.status(400).json({ error: 'RAWR! All fields are required!' });
   }
 
   const domoData = {
     name: rq.body.name,
     age: rq.body.age,
+    weebTrash: rq.body.weeb,
     owner: rq.session.account._id,
   };
 

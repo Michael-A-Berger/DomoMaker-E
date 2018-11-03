@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
 let AccountModel = {};
-const iterations = 10000;
+const iterations = 40000;
 const saltLength = 64;
 const keyLength = 64;
 

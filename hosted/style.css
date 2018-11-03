@@ -49,8 +49,6 @@ nav:nth-child(1) {
 
 .domoForm {
     border: 2px solid #338acc;
-    height: 35px;
-    width: 700px;
     margin-top:0px;
     padding-top:10px;
     background-color: #55acee;
@@ -59,16 +57,10 @@ nav:nth-child(1) {
 }
 
 .domoForm label {
-    display: inline-block;
     width: 75px;
     margin-left: 10px;
     font-size: 1.2em;
-    float: left;
     color: white;
-}
-
-.domoForm input[type=text] {
-    float:left;
 }
 
 .makeDomoSubmit {
@@ -198,6 +190,25 @@ nav:nth-child(1) {
     margin-top: 100px;
 }
 
+#weebSearch {
+  display: none;
+  min-width: 100px;
+  min-height: 100px;
+  background-color: rgba(0, 0, 0, 0);
+  border-radius: 0 0 5px 5px;
+}
+
+.weebEntry {
+  display: block;
+  width: 200px;
+  background-color: #FFFFFF;
+}
+
+.weebEntry:hover {
+  cursor: pointer;
+  background-color: #CCCCCC;
+}
+
 .domo {
     width: 95%;
     margin: 0 auto;
@@ -251,6 +262,14 @@ h3.domoAge {
     font-weight: bold;
     padding-right: 40px;
     font-size: 1.5em;
+}
+
+h3.domoWeeb {
+  float:left;
+  width: 200px;
+  font-weight: bold;
+  padding-left: 65px;
+  font-size: 1.5em;
 }
 
 .domo:first-child {

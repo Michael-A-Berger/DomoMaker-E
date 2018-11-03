@@ -12,8 +12,13 @@ const handleDomo = (e) => {
   e.preventDefault();
   $('#domoMessage').animate({ width: 'hide' }, 350);
   
+  // Hiding the Kitsu search results
+  $('#weebSearch').hide();
+  
   // Error checking
-  if ($('#domoName').val() == '' || $('#domoAge').val() == '') {
+  if ($('#domoName').val() == ''
+      || $('#domoAge').val() == ''
+      || $('#domoWeeb').val() == '') {
     handleError('RAWR! All fields are required');
     return false;
   }
@@ -25,6 +30,75 @@ const handleDomo = (e) => {
   
   return false;
 };
+
+// selectWeebEntry()
+const selectWeebEntry = (e) => {
+  // Setting the anime entry form to the clicked example
+  console.dir(e.target);
+  $('#domoWeeb').val(e.target.innerText);
+  
+  // Hiding the weeb searches
+  $('#weebSearch').hide();
+};
+
+// handleWeebEntries()
+const handleWeebEntries = (entries) => {
+  // Defining the HTML to render
+  let toRender = entries.map((entry) => {
+    return (
+      <div className='weebEntry' onClick={selectWeebEntry}>
+        <span>{entry}</span>
+      </div>
+    );
+  });
+  toRender = (
+    <div>
+      {toRender}
+    </div>
+  );
+  
+  // Rendering the search entries to the page
+  ReactDOM.render(toRender, document.querySelector('#weebSearch'));
+};
+
+// kitsuResponse()
+const kitsuResponse = (data) => {
+  let results = data.data;
+  let titles = {};
+  let titleKeys = [];
+  let entries = [];
+  for (var num = 0; num < results.length; num++) {
+    titles = results[num].attributes.titles;
+    titleKeys = Object.keys(titles);
+    for (var i = 0; i < titleKeys.length; i++) {
+      let entryYear = 'TBD';
+      if (results[num].attributes.startDate) {
+        entryYear = results[num].attributes.startDate;
+        entryYear = entryYear.substr(0, entryYear.indexOf('-'));
+      }
+      if (titles[titleKeys[i]] !== undefined) {
+        entries.push(`${titles[titleKeys[i]]} (${entryYear})`);
+        i = titleKeys.length;
+      }
+    }
+  }
+  
+  // Rendering the search results
+  handleWeebEntries(entries);
+  
+  // Showing the search results to the user
+  $('#weebSearch').show();
+  
+};
+
+// searchKitsu()
+const searchKitsu = (e) => {
+	if (e.target.value !== '' && e.target.value.length > 2){
+    console.log(`==========\nSearching for "${e.target.value}" on Kitsu... `);
+		sendAjax('GET', 'https://kitsu.io/api/edge/anime?filter[text]=' + e.target.value, null, kitsuResponse);
+	}
+};
+
 
 // DomoForm()
 const DomoForm = (props) => {
@@ -39,6 +113,9 @@ const DomoForm = (props) => {
       <input id='domoName' type='text' name='name' placeholder='Domo Name' />
       <label htmlFor='age'>Age: </label>
       <input id='domoAge' type='text' name='age' placeholder='Domo Age' />
+      <label id='domoWeebLabel' htmlFor='weeb'>Anime: </label>
+      <input id='domoWeeb' type='text' name='weeb' placeholder='Favorite Anime' onChange={searchKitsu} />
+      <div id='weebSearch'></div>
       <input type='hidden' name='_csrf' value={props.csrf} />
       <input className='makeDomoSubmit' type='submit' value='Make Domo'/>
     </form>
@@ -61,12 +138,13 @@ const DomoList = (props) => {
         <img src='/assets/img/domoface.jpeg' alt='domo face' className='domoFace' />
         <h3 className='domoName'> Name: {domo.name} </h3>
         <h3 className='domoAge'> Age: {domo.age} </h3>
+        <h3 className='domoWeeb'> Fav. Weeb Trash: {domo.weebTrash} </h3>
       </div>
     );
   });
   
   return (
-    <div className='domoLust'>
+    <div className='domoList'>
       {domoNodes}
     </div>
   );
